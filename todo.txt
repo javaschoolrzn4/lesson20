@@ -1,0 +1,497 @@
+Пошаговое построение MVC приложения
+
+Шаг 0 - перед началом работы нужно добавить все необходимые нашему проекту зависимости
+
+Открыть корневой файл pom.xml и добавить блок настроек и зависимостей:
+
+<properties>
+    <jetty.version>9.2.19.v20160908</jetty.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <spring.version>5.0.2.RELEASE</spring.version>
+</properties>
+
+<dependencies>
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.5</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context-support</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.freemarker</groupId>
+        <artifactId>freemarker</artifactId>
+        <version>2.3.28</version>
+    </dependency>
+</dependencies>
+
+
+Шаг 1 - создание нового модуля
+
+1)	Создать новый модуль File - New - Module
+2)	Тип - "Maven"
+3)	Add as module to  - springtimes
+4)	Parent - springtimes
+5)	ArtifactId - springtimes-web
+6)	Module name - springtimes-web
+
+
+Шаг 2 - создание каркаса web приложения
+
+7)	В папке main, на уровне java и resources, создать папку webapp
+8)	В папке webapp создать две директории static (для ресурсов веб приложения) и WEB-INF
+9)	В папке WEB-INF необходимо создать основной конфигурационный файл веб приложение - web.xml
+10)	Заполнить файл содержимым:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+
+</web-app>
+
+
+Шаг 3 - заполнение web.xml данными
+
+11)	 Добавляем имя нашего приложения
+
+<display-name>SpringTimes</display-name>
+
+12)	 Определяем диспетчер-сервлет
+
+<servlet>
+    <servlet-name>springtimes</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+</servlet>
+
+13)	 Определяем путь, который будет слушать наш сервлет
+
+<servlet-mapping>
+    <servlet-name>springtimes</servlet-name>
+    <url-pattern>/</url-pattern>
+</servlet-mapping>
+
+Возвращаемся к обсуждению, servletName-servlet.xml
+
+
+Шаг 4 - настройка контекста
+
+14)	 Создать файл springtimes-servlet.xml и заполнить его каркас:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+</beans>
+
+обратите внимание, пространство mvc уже добавлено
+
+15)	 Продолжаем заполнение нашего контекста, добавляем бин с определением механизма отображения:
+
+<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+
+
+Шаг 5 - создание контроллера
+
+16)	 создадим пакет для контроллера ru.springtimes.web.controller
+17)	 в только что созданном пакете создадим класс контроллера WelcomeController:
+
+package ru.springtimes.web.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
+
+public class WelcomeController extends AbstractController {
+    // сообщение, которое мы хотим передать в наше представление
+    public static final String HELLO_WORLD = "Привет Мир!";
+
+    // получаем все данные о запросе
+    @Override
+    protected ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // ищем представление по имени welcome, что будет если переименовать?
+        ModelAndView model = new ModelAndView("welcome");
+        // поменяем сообщение
+        model.addObject("message", HELLO_WORLD);
+        return model;
+    }
+}
+
+
+Шаг 6 - заполнение конфигурации
+
+18)	 определим класс контроллера в конфигурации
+<bean name="/welcome.html" class="ru.springtimes.web.controller.WelcomeController" />
+
+19)	 определим арбитр представлений
+
+<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix">
+        <value>/WEB-INF/views/pages/</value>
+    </property>
+    <property name="suffix">
+        <value>.jsp</value>
+    </property>
+</bean>
+
+
+Шаг 7 - подготовка к запуску
+20)	скопировать в проект springtimes-web в папку src/test/ содержание папки src/test родительского проекта
+21)	скопировать в проект springtimes-web в папку src/main/webapp/WEB-INF/ содержимое папки src/main/resources
+22)	настроить плагин для запуска сервера jetty, скопировав в pom.xml модуля springtimes-web секцию build:
+
+<build>
+    <plugins>
+        <plugin>
+            <inherited>true</inherited>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.1</version>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+                <encoding>UTF-8</encoding>
+                <showWarnings>true</showWarnings>
+                <showDeprecation>true</showDeprecation>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-maven-plugin</artifactId>
+            <version>${jetty.version}</version>
+            <configuration>
+                <systemProperties>
+                    <systemProperty>
+                        <name>maven.project.build.directory.test-classes</name>
+                        <value>${project.build.directory}/test-classes</value>
+                    </systemProperty>
+                </systemProperties>
+                <jettyXml>
+                    ${project.basedir}/src/test/jetty/jetty.xml,${project.basedir}/src/test/jetty/jetty-ssl.xml,${project.basedir}/src/test/jetty/jetty-http.xml,${project.basedir}/src/test/jetty/jetty-https.xml
+                </jettyXml>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+Шаг 8 - работа со статическими ресурсами
+
+23) проверяем доступ к статическим ресурсам http://127.0.0.1:8080/static/style.css
+
+24) добавляем обработчик на статические ресурсы
+
+<mvc:resources mapping="/static/**" location="/static/" />
+
+Шаг 9 - создание контроллера на аннотациях
+
+25) Создать новый окнтроллер на аннотациях - IndexController:
+
+package ru.springtimes.web.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.Map;
+
+@Controller
+public class IndexController {
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public String index(Map<String, Object> sayModel) {
+        sayModel.put("data", "Мяу!");
+        return "index";
+    }
+}
+
+26) Скопировать welcome.jsp с новым именем index.jsp
+
+27) Отредактировать index.jsp по данным контроллера
+
+28) Добавить в пространства определения бинов новые значение, чтобы оно приобрело вид:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+</bean>
+
+29) Добавить возможность работы с аннотациями
+
+ <mvc:annotation-driven/>
+
+30) Добавить поиск аннотаций
+
+<context:component-scan base-package="ru.springtimes.web.controller" />
+
+31) Проверить!!!
+
+Шаг 10 - избавление от XML
+
+32) Создаем пакет конфигурации ru.springtimes.web.config
+
+33) Создаем конфигурационный файл SpringtimesConfig
+
+34) Заполняем его содержимым:
+
+package ru.springtimes.web.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import javax.annotation.PostConstruct;
+
+@Configuration
+@ComponentScan(basePackages = "ru.springtimes", includeFilters = {
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "ru.springtimes.config.*"),
+        @ComponentScan.Filter(type = FilterType.REGEX, pattern = "ru.springtimes.controller.*")
+})
+@PropertySource(value = {"classpath:springtimes.properties"}, ignoreResourceNotFound = true, encoding = "UTF-8")
+public class SpringtimesConfig {
+    @Value("${springtimes.param3:o_O}")
+    private String myParam;
+
+    @PostConstruct
+    public void init() {
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + myParam);
+    }
+}
+
+35) Разбираем файл по блокам
+
+36) В пакете ru.springtimes.web.config создаем еще один конфигурационный файл WebConfig и заполняем его содержимым:
+
+package ru.springtimes.web.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+
+@EnableWebMvc
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+    public static final String RESOURCES_PATH = "/static/**";
+
+    public static final String RESOURCES_LOCATION = "/static/";
+
+    @Override
+    public void addResourceHandlers(final ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(RESOURCES_PATH).addResourceLocations(RESOURCES_LOCATION);
+    }
+
+    @Bean
+    public FreeMarkerViewResolver freemarkerViewResolver() {
+        FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
+        resolver.setCache(true);
+        resolver.setExposeSpringMacroHelpers(true);
+        resolver.setExposeRequestAttributes(true);
+        resolver.setPrefix("");
+        resolver.setSuffix(".ftl");
+        resolver.setContentType("text/html;charset=UTF-8");
+        return resolver;
+    }
+
+    @Bean
+    public FreeMarkerConfigurer freemarkerConfig() {
+        FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+        freeMarkerConfigurer.setTemplateLoaderPath("/WEB-INF/views/ftl/");
+        freeMarkerConfigurer.setDefaultEncoding("UTF-8");
+        return freeMarkerConfigurer;
+    }
+}
+
+37) Разбираем файл по блокам
+
+38) Скопировать новые представления из папки src/main/roseurces/views/
+
+39) связать все вместе дозаполнив файл web.xml:
+
+    <!-- Третье - определение слушателя контекста, чтобы можно было добавлять файлы в контекст спринга-->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <!-- Чтобы аннотации подхватывались -->
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </context-param>
+
+    <!--Чтобы показать где сидит наша конфигурация-->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            ru.springtimes.web.config.SpringtimesConfig
+        </param-value>
+    </context-param>
+
+40) Разбираем файл по блокам
+
+41) Проверить!!!
+
+42) Создаем property файл по имени указанному в конигурации и заполняем содержимым:
+
+springtimes.param1=111
+springtimes.param2=222
+springtimes.param3=333
+springtimes.param4=444
+springtimes.param5=555
+
+title=Spring SpringtimesTitle
+
+43) Анализиируем загрузку пропертей в приложение
+
+44) Проверяем статические реурсы через конфиг аннотаций
+
+45) Смотрим котиков, создаем контроллер CatController:
+
+package ru.springtimes.web.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import ru.springtimes.data.MrCat;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Controller
+public class CatController {
+    private static List<MrCat> catList = new ArrayList<MrCat>();
+
+    static {
+        catList.add(new MrCat("Барсик", "Белый"));
+        catList.add(new MrCat("Снежок", "Белый"));
+        catList.add(new MrCat("Пират", "Черный"));
+        catList.add(new MrCat("Дымок", "Серый"));
+        catList.add(new MrCat("Пиксель", "Рыжый"));
+    }
+
+    @RequestMapping(value = "/cat", method = RequestMethod.GET)
+    public String index(Map<String, Object> sayModel, @ModelAttribute("model") ModelMap catModel) {
+        sayModel.put("say", "Мяу!");
+        catModel.addAttribute("catList", catList);
+        return "cat";
+    }
+
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public String add(@ModelAttribute("cat") MrCat mrCat) {
+        // Тут может быть любая логика, но в хороших приложения тут идет вызов сервисного слоя
+        if (null != mrCat && null != mrCat.getFirstName() && null != mrCat.getColor() && !mrCat.getFirstName().isEmpty() && !mrCat.getColor().isEmpty()) {
+            synchronized (catList) {
+                catList.add(mrCat);
+            }
+        }
+        return "redirect:cat";
+    }
+}
+
+46) и представление:
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Crafty Cat</title>
+</head>
+
+<body>
+
+<h1>${say}</h1>
+
+<div id="header"></div>
+
+<div id="content">
+    <fieldset>
+        <legend>Добавить кота:</legend>
+        <form name="" action="add.html" method="post">
+            Кличка: <input type="text" name="firstName"/> <br/>
+            Цвет: <input type="text" name="color"/> <br/>
+            <input type="submit" value="   Save   "/>
+        </form>
+    </fieldset>
+    <br/>
+    <table class="datatable">
+        <tr>
+            <th>Кличка</th>
+            <th>Цвет</th>
+        </tr>
+    <#list model["catList"] as cat>
+        <tr>
+            <td>${cat.firstName}</td>
+            <td>${cat.color}</td>
+        </tr>
+    </#list>
+    </table>
+</div>
+</body>
+</html>
+
+47) Разбираем котиков
+
+48) Назад к презентации
+
+49) Создаем новую конфигурацию MyWebAppInitializer:
+
+package ru.springtimes.web.config;
+
+import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
+
+public class MyWebAppInitializer implements WebApplicationInitializer {
+    @Override
+    public void onStartup(ServletContext container) {
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.register(SpringtimesConfig.class);
+
+        container.addListener(new ContextLoaderListener(context));
+
+        ServletRegistration.Dynamic dispatcher = container.addServlet("dispatcher", new DispatcherServlet(context));
+
+        dispatcher.setLoadOnStartup(1);
+        dispatcher.addMapping("/");
+    }
+}
+
+50) Проверяем.
+
+

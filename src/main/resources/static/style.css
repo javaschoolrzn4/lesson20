@@ -1,0 +1,58 @@
+html, body {
+    font-weight: bold;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+span {
+    font-size: 64pt;
+}
+
+input[type=text] {
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 0.8em 1em;
+    width: 60%;
+}
+
+.content {
+    display: table;
+    height: 100%;
+    padding: 0 20%;
+    position: relative;
+    width: 60%;
+}
+
+.search {
+    box-sizing: border-box;
+    display: table-cell;
+    overflow: hidden;
+    padding-bottom: 64pt;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.b {
+    color: #4682FA;
+}
+
+.r {
+    color: #FA4646;
+}
+
+.o {
+    color: #FAB400;
+}
+
+.g {
+    color: #00B400;
+}
+
+.m {
+    color: #FA00FA;
+}
+
+.s {
+    color: #00FAFA;
+}

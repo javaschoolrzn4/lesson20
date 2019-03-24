@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring Times</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+<script>
+    var classes = ["b", "r", "g", "o", "m", "s"];
+
+    function createTitle(input) {
+        var style = classes;
+        var word = [];
+
+        for (var i = 0; i < input.length; i++) {
+            var symbol = {};
+            symbol.value = input[i];
+            symbol.color = getSymbolClass(style, word[i - 1]);
+            word.push(symbol);
+        }
+
+        for (var i = 0; i < word.length; i++) {
+            console.log("<span class='" + word[i].color + "'>" + word[i].value + "</span>");
+            document.write("<span class='" + word[i].color + "'>" + word[i].value + "</span>");
+        }
+    }
+
+    function getSymbolClass(colors, symbol) {
+        console.log(symbol);
+        if (symbol != undefined && symbol != null) {
+            var currentColor;
+            do {
+                currentColor = colors[getRandomPosition(colors.length)];
+            } while (symbol.color == currentColor);
+            return currentColor;
+        } else {
+            return colors[getRandomPosition(colors.length)];
+        }
+    }
+
+    function getRandomPosition(max) {
+        var min = 0;
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    //createTitle("12345678");
+</script>
+
+
+<div class="content">
+    <div class="search">
+        <div>
+            <span class='b'>S</span>
+            <span class='r'>p</span>
+            <span class='o'>r</span>
+            <span class='b'>i</span>
+            <span class='g'>n</span>
+            <span class='r'>g</span>
+            <span class='b'>T</span>
+            <span class='g'>i</span>
+            <span class='o'>m</span>
+            <span class='r'>e</span>
+            <span class='b'>s</span>
+        </div>
+        <div>
+            <input type="text" placeholder="some string">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
