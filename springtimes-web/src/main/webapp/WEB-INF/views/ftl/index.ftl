@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>
-    <@spring.message "title"/>
+
     </title>
     <style>
         .error {
@@ -13,7 +13,7 @@
 </head>
 <body>
     <h2>
-        <@spring.message "title"/>
+
     </h2>
     <h1>${data}</h1>
 </body>
