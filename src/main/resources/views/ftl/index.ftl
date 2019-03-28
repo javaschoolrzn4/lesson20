@@ -15,6 +15,6 @@
     <h2>
         <@spring.message "title"/>
     </h2>
-    <h1>${data}</h1>
+    <h1>${ru.springtimes.data}</h1>
 </body>
 </html>

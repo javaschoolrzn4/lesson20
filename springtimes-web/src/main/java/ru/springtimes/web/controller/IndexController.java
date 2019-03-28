@@ -10,7 +10,7 @@ import java.util.Map;
 public class IndexController {
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     public String index(Map<String, Object> sayModel) {
-        sayModel.put("data", "Мяу!");
+        sayModel.put("ru/springtimes/data", "Мяу!");
         return "index";
     }
 }
